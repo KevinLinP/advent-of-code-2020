@@ -15,7 +15,7 @@ fn main() {
         let first_number = *first_number_ref;
         for second_index in first_index..(numbers_set.len() - 1) {
             let second_number = numbers[second_index];
-            let third_number = 2020i32 - first_number - second_number;
+            let third_number = 2020 - first_number - second_number;
 
             if numbers_set.contains(&third_number) {
                 println!("{}", first_number * second_number * third_number);
