@@ -18,28 +18,22 @@ defmodule Solver do
 
   defp row(line) do
     String.slice(line, 7, 3)
-    |> String.graphemes
-    #|> IO.inspect
-    |> Enum.reduce({0, 7}, fn char, {low, high} ->
-      if char == "L" do
-        {low, ((low + high + 1) / 2) - 1}
-      else
-        {(low + high + 1) / 2, high}
-      end
-    end)
-    #|> IO.inspect
-    |> elem(0)
-    |> trunc
+    |> magic(7, "L")
     #|> IO.inspect
   end
 
   # could de-dup w/ row()
   defp column(line) do
     String.slice(line, 0, 7)
-    |> String.graphemes
+    |> magic(127, "F")
     #|> IO.inspect
-    |> Enum.reduce({0, 127}, fn char, {low, high} ->
-      if char == "F" do
+  end
+
+  defp magic(string, max, lower_char) do
+    String.graphemes(string)
+    #|> IO.inspect
+    |> Enum.reduce({0, max}, fn char, {low, high} ->
+      if char == lower_char do
         {low, ((low + high + 1) / 2) - 1}
       else
         {(low + high + 1) / 2, high}
@@ -48,7 +42,6 @@ defmodule Solver do
     #|> IO.inspect
     |> elem(0)
     |> trunc
-    #|> IO.inspect
   end
 end
 
