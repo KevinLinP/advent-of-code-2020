@@ -1,19 +1,28 @@
 defmodule Solver do
   def solve do
-    File.stream!("5.input")
-    |> Stream.map(&score(&1))
-    |> Enum.max
+    # unknown seats are missing from unknown num rows
+    # at the front and back, so you can't use an
+    # expected sum =(
+
+    # an plain array is probably more memory-efficient, but oh well
+    ids = File.stream!("5.input")
+          |> Stream.map(&id(&1))
+          #|> IO.inspect
+          |> MapSet.new
+
+    Enum.find(0..955, fn num ->
+      !MapSet.member?(ids, num) &&
+        MapSet.member?(ids, num - 1) &&
+        MapSet.member?(ids, num + 1)
+    end)
     |> IO.inspect
   end
 
-  def score(line) do
-    String.slice(line, 0, 10)
-    |> IO.puts
+  defp id(line) do
+    #String.slice(line, 0, 10)
+    #|> IO.puts
 
-    column = column(line)
-    row = row(line)
-
-    (column * 8) + row
+    (column(line) * 8) + row(line)
   end
 
   defp row(line) do
@@ -29,6 +38,7 @@ defmodule Solver do
     #|> IO.inspect
   end
 
+  # for speed, cache these strings in a map
   defp magic(string, max, lower_char) do
     String.graphemes(string)
     #|> IO.inspect
