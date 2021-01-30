@@ -1,3 +1,6 @@
+// it was strange to write, but feels fine reading.
+// feels like a barebones language
+
 package main
 
 import (

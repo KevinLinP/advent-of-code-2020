@@ -1,3 +1,6 @@
+# probably my language of choice for puzzling if
+# execution speed wasn't a factor
+
 file = open("3.input", "r")
 PATTERN_WIDTH = 31
 

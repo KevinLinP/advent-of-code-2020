@@ -1,3 +1,6 @@
+// really 'beta' language, kinda string writing 'JS',
+// but with no objects or closures
+
 import "wasi";
 import { FileSystem } from "as-wasi";
 

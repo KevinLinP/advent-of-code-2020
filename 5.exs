@@ -1,3 +1,7 @@
+# functional, so it's different,
+# but it's elegant to read once it's written.
+# needs a different brain though.
+
 defmodule Solver do
   def solve do
     # unknown seats are missing from unknown num rows

@@ -1,3 +1,6 @@
+# probably my language of choice if speed was a factor,
+# but not enough that I wanted Rust
+
 # this actually returns 104, but the correct answer is 103???
 
 global EYE_COLORS = Set(["amb", "blu", "brn", "gry", "grn", "hzl", "oth"])

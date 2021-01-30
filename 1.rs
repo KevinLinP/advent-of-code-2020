@@ -1,3 +1,5 @@
+// it's a safer C. really great compiler error messages.
+
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 use std::collections::HashSet;

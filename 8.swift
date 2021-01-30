@@ -1,4 +1,4 @@
-// implementation notes: parsing sucks, debugging is tricky, looks nice otherwise
+// parsing sucks, debugging is tricky, looks nice otherwise
 
 import Foundation
 

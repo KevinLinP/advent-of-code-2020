@@ -1,3 +1,6 @@
+// null checks is nice, if I were a Java developer I'd
+// hop onto this immediately. Java has a heavy
+// interfaces system though
 import java.io.File
 import java.util.LinkedList
 
