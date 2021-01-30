@@ -7,6 +7,7 @@ import java.util.LinkedList
 class Solver() {
     val inverseTree = HashMap<String, MutableSet<String>>()
     val tree = HashMap<String, MutableMap<String, Int>>()
+    val selfAndDescendantCounts = HashMap<String, Int>()
 
     val lineRegex = Regex("""(.+) bags contain (.+).""")
     val childRegex = Regex("""(\d+) (.+) bags?""")
@@ -19,29 +20,26 @@ class Solver() {
         //printParents("shiny gold")
     }
 
-    private fun printDescendantCount(parent: String) {
-        var count = 0
-        val queue = LinkedList<Pair<String, Int>>()
-        queue.addLast(Pair(parent, 1))
+    private fun printDescendantCount(type: String) {
+        val count = selfAndDescendantCount(type) - 1
+        println("$type descendantCount: $count")
+    }
 
-        // this would be much more efficient if can cache the result
-        // of subtrees
-        while (queue.size > 0) {
-            val currentPair = queue.removeFirst()
-            val currentType = currentPair.first
-            val currentCount = currentPair.second
+    private fun selfAndDescendantCount(type: String): Int {
+        val cachedCount = selfAndDescendantCounts[type]
+        if (cachedCount !== null) { return cachedCount }
 
-            val children = tree[currentType]
-            if (children == null) { continue }
+        var count = 1
 
+        val children = tree[type]
+        if (children != null) {
             for ((childType, childCount) in children) {
-                val childTotalCount = (currentCount * childCount)
-                count += childTotalCount
-                queue.addLast(Pair(childType, childTotalCount))
+                count += (childCount * selfAndDescendantCount(childType))
             }
         }
 
-        println("$parent descendantCount: $count")
+        selfAndDescendantCounts[type] = count
+        return count
     }
 
     private fun printParents(child: String) {
