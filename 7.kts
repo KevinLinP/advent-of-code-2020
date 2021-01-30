@@ -12,9 +12,36 @@ class Solver() {
     val childRegex = Regex("""(\d+) (.+) bags?""")
 
     fun solve() {
-        parseInput()
-        printInverseTree()
-        printParents("shiny gold")
+        parseInput("7.input")
+        printTree()
+        //printInverseTree()
+        printDescendantCount("shiny gold")
+        //printParents("shiny gold")
+    }
+
+    private fun printDescendantCount(parent: String) {
+        var count = 0
+        val queue = LinkedList<Pair<String, Int>>()
+        queue.addLast(Pair(parent, 1))
+
+        // this would be much more efficient if can cache the result
+        // of subtrees
+        while (queue.size > 0) {
+            val currentPair = queue.removeFirst()
+            val currentType = currentPair.first
+            val currentCount = currentPair.second
+
+            val children = tree[currentType]
+            if (children == null) { continue }
+
+            for ((childType, childCount) in children) {
+                val childTotalCount = (currentCount * childCount)
+                count += childTotalCount
+                queue.addLast(Pair(childType, childTotalCount))
+            }
+        }
+
+        println("$parent descendantCount: $count")
     }
 
     private fun printParents(child: String) {
@@ -43,22 +70,30 @@ class Solver() {
         println(allParents.size)
     }
 
-    private fun printInverseTree() {
-        println("inverseTree:")
-        for (child in inverseTree.keys) {
-            println("'$child'")
-            val parents = inverseTree[child]
-            if (parents != null) {
-                for (parent in parents) {
-                    println("'$parent'")
-                }
+    private fun printTree() {
+        println("tree:")
+        for ((parent, children) in tree) {
+            println("'$parent'")
+            for ((childType, childValue) in children) {
+                println("'$childType' $childValue")
             }
             println()
         }
     }
 
-    private fun parseInput() {
-        File("7.input.sample").forEachLine {
+    private fun printInverseTree() {
+        println("inverseTree:")
+        for ((child, parents) in inverseTree) {
+            println("'$child'")
+            for (parent in parents) {
+                println("'$parent'")
+            }
+            println()
+        }
+    }
+
+    private fun parseInput(path: String) {
+        File(path).forEachLine {
             val matchResult = lineRegex.find(it)
             val groups = matchResult!!.groups
 
@@ -71,14 +106,22 @@ class Solver() {
 
     private fun parseLine(parent: String, childStrings: Collection<String>) {
         //println(parent)
+        var children = tree[parent]
+        if (children == null) {
+            children = HashMap<String, Int>()
+            tree[parent] = children
+        }
 
         for(childString in childStrings) {
             //println(childString)
             val matchResult = childRegex.find(childString)
             if (matchResult == null) { continue } // contain no other bags case
 
+            val childCount = matchResult.groups.get(1)!!.value.toInt()
             val childType = matchResult.groups.get(2)!!.value
             //println(childType)
+
+            children[childType] = childCount
 
             var parents = inverseTree[childType]
             if (parents == null) {
