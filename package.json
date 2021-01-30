@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@assemblyscript/loader": "^0.18.1",
+    "as-wasi": "^0.4.4"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.18.1"
+  }
+}
