@@ -1,23 +1,49 @@
+// implementation notes: parsing sucks, debugging is tricky, looks nice otherwise
+
 import Foundation
 
 class Solver {
     var operations = [(String, Int)]()
 
+    var pointer = 0
+    var acc = 0
+    var visited = [Bool]()
+
     func solve() {
         parseInput()
-        /*printOperations()*/
-        runUntilLoop()
+        print("\(operations.count) operations")
+        visited = Array(repeating: false, count: operations.count)
+
+        for (op, num) in operations {
+            if (op == "acc") { continue }
+
+            let success = runUntilLoop(opToFlip: num)
+            if (success) {
+                break
+            }
+        }
     }
 
-    func runUntilLoop() {
-        var pointer = 0
-        var acc = 0
-        var visited = Array(repeating: false, count: operations.count)
+    func resetState() {
+        pointer = 0
+        acc = 0
+
+        for (i, _) in visited.enumerated() {
+            visited[i] = false
+        }
+    }
+
+    func runUntilLoop(opToFlip: Int) -> Bool {
+        resetState()
 
         while (!visited[pointer]) {
             visited[pointer] = true
-            let (op, num) = operations[pointer]
-            print("\(op) \(num)")
+            var (op, num) = operations[pointer]
+            /*print("\(op) \(num)")*/
+
+            if (pointer == opToFlip) {
+                op = (op == "jmp") ? "nop" : "jmp"
+            }
 
             switch op {
             case "acc":
@@ -30,9 +56,16 @@ class Solver {
             default:
                 print("unrecognized operator \(op)")
             }
+
+            if (pointer > operations.count || pointer < 0) {
+                return false
+            } else if (pointer == operations.count) {
+                print("unlooped acc:\(acc) pointer:\(pointer) opToFlip:\(opToFlip)")
+                return true
+            }
         }
 
-        print("loop acc:\(acc) pointer:\(pointer)")
+        return false
     }
 
     func printOperations() {
