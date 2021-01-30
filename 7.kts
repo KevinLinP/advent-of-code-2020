@@ -5,51 +5,52 @@ import java.util.LinkedList
 // kotlinc -script 7.kts
 
 class Solver() {
-    val containees = HashMap<String, MutableSet<String>>()
+    val inverseTree = HashMap<String, MutableSet<String>>()
+    val tree = HashMap<String, MutableMap<String, Int>>()
 
     val lineRegex = Regex("""(.+) bags contain (.+).""")
-    val rightRegex = Regex("""(\d+) (.+) bags?""")
+    val childRegex = Regex("""(\d+) (.+) bags?""")
 
     fun solve() {
         parseInput()
-        printContainees()
-        printDescendants("shiny gold")
+        printInverseTree()
+        printParents("shiny gold")
     }
 
-    private fun printDescendants(start: String) {
-        val descendants = HashSet<String>()
+    private fun printParents(child: String) {
+        val allParents = HashSet<String>()
         val queue = LinkedList<String>()
-        queue.addLast(start)
+        queue.addLast(child)
 
         while (queue.size > 0) {
             val current = queue.removeFirst()
-            val containers = containees[current]
+            val currentParents = inverseTree[current]
 
-            if (containers != null) {
-                for (container in containers) {
-                    if (!descendants.contains(container)) {
-                        descendants.add(container)
-                        queue.addLast(container)
+            if (currentParents != null) {
+                for (currentParent in currentParents) {
+                    if (!allParents.contains(currentParent)) {
+                        allParents.add(currentParent)
+                        queue.addLast(currentParent)
                     }
                 }
             }
         }
 
-        println("descendants:")
-        for (descendant in descendants) {
-            println(descendant)
+        println("$child allParents:")
+        for (parent in allParents) {
+            println(parent)
         }
-        println(descendants.size)
+        println(allParents.size)
     }
 
-    private fun printContainees() {
-        println("containees:")
-        for (containee in containees.keys) {
-            println("'$containee'")
-            val containers = containees[containee]
-            if (containers != null) {
-                for (container in containers) {
-                    println("'$container'")
+    private fun printInverseTree() {
+        println("inverseTree:")
+        for (child in inverseTree.keys) {
+            println("'$child'")
+            val parents = inverseTree[child]
+            if (parents != null) {
+                for (parent in parents) {
+                    println("'$parent'")
                 }
             }
             println()
@@ -57,40 +58,39 @@ class Solver() {
     }
 
     private fun parseInput() {
-        File("7.input").forEachLine {
+        File("7.input.sample").forEachLine {
             val matchResult = lineRegex.find(it)
             val groups = matchResult!!.groups
 
-            val left = groups.get(1)!!.value
-            val rightArray = groups.get(2)!!.value.split(", ")
+            val parent = groups.get(1)!!.value
+            val childStrings = groups.get(2)!!.value.split(", ")
 
-            parseLine(left, rightArray)
+            parseLine(parent, childStrings)
         }
     }
 
-    // TODO: holy shit come up with better names for this crap
-    private fun parseLine(left: String, rightArray: Collection<String>) {
-        println(left)
+    private fun parseLine(parent: String, childStrings: Collection<String>) {
+        //println(parent)
 
-        for(right in rightArray) {
-            //println(right)
-            val matchResult = rightRegex.find(right)
+        for(childString in childStrings) {
+            //println(childString)
+            val matchResult = childRegex.find(childString)
             if (matchResult == null) { continue } // contain no other bags case
 
-            val rightType = matchResult.groups.get(2)!!.value
-            println(rightType)
+            val childType = matchResult.groups.get(2)!!.value
+            //println(childType)
 
-            var containers = containees[rightType]
-            if (containers == null) {
-                containers = HashSet<String>()
-                containers.add(left)
-                containees[rightType] = containers
+            var parents = inverseTree[childType]
+            if (parents == null) {
+                parents = HashSet<String>()
+                parents.add(parent)
+                inverseTree[childType] = parents
             } else {
-                containers.add(left)
+                parents.add(parent)
             }
         }
 
-        println()
+        //println()
     }
 }
 
