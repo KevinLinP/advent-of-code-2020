@@ -14,25 +14,31 @@
     (string->number line)))
 (close-input-port input-file)
 
-(define last-target 0)
+(define number-window
+  (for/mutable-set ([num (in-vector numbers 0 window-size)]) num))
+;(for ([num number-window-set]) (printf "~a " num))
 
-(for ([target numbers]
-      [lower-index (in-range (- 0 window-size) 9999999)]
-      [upper-index (in-range -1 9999999)]
-      #:when (>= lower-index 0))
+(define unfilled-target -1)
+(for ([target (in-vector numbers window-size)]
+      [lower (in-vector numbers 0)]
+      [upper (in-vector numbers (- window-size 1))]
+      [index-to-remove (in-range -1 99999999)])
+  
   (cond [debug-part-1 (printf "~a " target)])
-  
-  (define number-window
-    (for/list ([num (in-vector numbers lower-index (+ upper-index 1))]) num)) ; exclusive at top!
-  ;(for ([num number-window]) (printf "~a " num))
 
-  ; maintaining a HashSet to check for pair is algorithmically faster
+  (set-add! number-window upper)
+  (cond [(>= index-to-remove 0) (set-remove! number-window (vector-ref numbers index-to-remove))])
+
+  ; this was originally done by creating a list from the 'vector window'
+  ; to pass into (combinations .. 2), and then looking for a pair
+  ; that sums correctly
   (define valid-pair
-    (for/first ([pair (in-combinations number-window 2)]
-                #:when (eq? target (apply + pair)))
-      pair))
+    (for/first
+        ([num (in-mutable-set number-window)]
+         #:when (set-member? number-window (- target num)))
+      (cons num (- target num))))
   
-  (cond [(not valid-pair) (set! last-target target)])
+  (cond [(not valid-pair) (set! unfilled-target target)])
   #:break (not valid-pair)
 
   (cond
@@ -40,19 +46,19 @@
      (printf "(~a ~a) " (first valid-pair) (last valid-pair))
      (printf "~%")]))
   
-(printf "~%~%last-target: ~a~%~%" last-target)
+(printf "unfilled-target: ~a~%" unfilled-target)
 
 (for ([lower numbers]
       [lower-index (in-naturals)]
-      #:when (< lower last-target))
+      #:when (< lower unfilled-target))
   (for ([upper (in-vector numbers (+ lower-index 1))]
         [upper-index (in-naturals (+ lower-index 1))])
     (define sum
       (for/sum ([num (in-vector numbers lower-index (+ upper-index 1))]) num))
-    #:break (> sum last-target)
+    #:break (> sum unfilled-target)
     (cond
-      [(eq? sum last-target)
-       (define min last-target)
+      [(eq? sum unfilled-target)
+       (define min unfilled-target)
        (define max 0)
        (for ([current-num (in-vector numbers lower-index (+ upper-index 1))])
          (cond [(< current-num min) (set! min current-num)])
