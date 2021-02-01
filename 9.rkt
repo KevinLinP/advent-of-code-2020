@@ -18,7 +18,7 @@
   (for/mutable-set ([num (in-vector numbers 0 window-size)]) num))
 ;(for ([num number-window-set]) (printf "~a " num))
 
-(define unfilled-target -1)
+(define unfilled-target null)
 (for ([target (in-vector numbers window-size)]
       [lower (in-vector numbers 0)]
       [upper (in-vector numbers (- window-size 1))]
@@ -32,21 +32,24 @@
   ; this was originally done by creating a list from the 'vector window'
   ; to pass into (combinations .. 2), and then looking for a pair
   ; that sums correctly
-  (define valid-pair
-    (for/first
-        ([num (in-mutable-set number-window)]
-         #:when (set-member? number-window (- target num)))
-      (cons num (- target num))))
+  (define valid-pair null)
+  (for ([num (in-mutable-set number-window)])
+    (define other-num (- target num))
+    (cond [(set-member? number-window other-num) (set! valid-pair (cons num other-num))])
+    #:break (not (null? valid-pair))
+    #f)
   
-  (cond [(not valid-pair) (set! unfilled-target target)])
-  #:break (not valid-pair)
+  (cond [(null? valid-pair) (set! unfilled-target target)])
+  #:break (not (null? unfilled-target))
 
   (cond
     [debug-part-1
-     (printf "(~a ~a) " (first valid-pair) (last valid-pair))
+     (printf "(~a ~a) " (car valid-pair) (cdr valid-pair))
      (printf "~%")]))
   
 (printf "unfilled-target: ~a~%" unfilled-target)
+
+(define sum-indicies null)
 
 (for ([lower numbers]
       [lower-index (in-naturals)]
@@ -56,13 +59,18 @@
     (define sum
       (for/sum ([num (in-vector numbers lower-index (+ upper-index 1))]) num))
     #:break (> sum unfilled-target)
-    (cond
-      [(eq? sum unfilled-target)
-       (define min unfilled-target)
-       (define max 0)
-       (for ([current-num (in-vector numbers lower-index (+ upper-index 1))])
-         (cond [(< current-num min) (set! min current-num)])
-         (cond [(> current-num max) (set! max current-num)])
-         )
-       (printf "[~a..~a] ~a + ~a = ~a~%" lower-index upper-index min max (+ min max))])
-    ))
+    (cond [(eq? sum unfilled-target) (set! sum-indicies (cons lower-index upper-index))])
+    #:break (not (null? sum-indicies))
+    #f)
+  #:break (not (null? sum-indicies))
+  #f)
+
+(printf "[~a..~a] " (car sum-indicies) (cdr sum-indicies))
+
+(define min unfilled-target)
+(define max 0)
+(for ([current-num (in-vector numbers (car sum-indicies) (+ (cdr sum-indicies) 1))])
+  (cond [(< current-num min) (set! min current-num)])
+  (cond [(> current-num max) (set! max current-num)])
+  )
+(printf "~a + ~a = ~a~%" min max (+ min max))
