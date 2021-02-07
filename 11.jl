@@ -73,10 +73,7 @@ function calculate_coords_with_visible_coords(inputspec)
 end
 
 
-function solvevisible()
-  # inputspec = InputSpec("11.input.sample", 10, 10)
-  inputspec = InputSpec("11.input", 92, 94)
-
+function solvevisible(inputspec)
   currentgrid = falses(inputspec.height, inputspec.width)
   nextgrid = falses(inputspec.height, inputspec.width)
 
@@ -90,22 +87,36 @@ function solvevisible()
 
     for coordwithvis in allcoordwithvis
       coord = coordwithvis.coord
-      currentvalue = currentgrid[coord]
-      occupiedcount = 0
+      visiblecoords = coordwithvis.visiblecoords
 
-      # could early exit on >0 and >=5
-      for visiblecoord in coordwithvis.visiblecoords
-        if currentgrid[visiblecoord]
-          occupiedcount += 1
+      isoccupied = currentgrid[coord]
+
+      if isoccupied
+        if length(visiblecoords) < 5
+          continue
         end
-      end
 
-      if currentvalue && occupiedcount >= 5
-        nextgrid[coord] = false
-        anychanged = true
-      elseif !currentvalue && occupiedcount == 0
-        nextgrid[coord] = true
-        anychanged = true
+        occupiedcount = 0
+
+        for visiblecoord in visiblecoords
+          if currentgrid[visiblecoord]
+            occupiedcount += 1
+          end
+
+          if occupiedcount >= 5
+            nextgrid[coord] = false
+            anychanged = true
+            continue
+          end
+        end
+      else
+        # i find the .any more explict to read than the .all
+        if any(visiblecoord -> (currentgrid[visiblecoord]), visiblecoords)
+          continue
+        else
+          nextgrid[coord] = true
+          anychanged = true
+        end
       end
     end
 
@@ -117,15 +128,13 @@ end
 
 # i'm oversizing the array by +2 in each direction
 # to avoid doing conditional checks
-function solveneighbor()
-  # inputspec = ("11.input.sample", 10, 10)
-  inputspec = ("11.input", 92, 94)
-  xsize = inputspec[2] + 2 # Julia arrays start at 1
-  ysize = inputspec[3] + 2
+function solveneighbor(inputspec)
+  xsize = inputspec.width + 2 # Julia arrays start at 1
+  ysize = inputspec.height + 2
 
   currentgrid = falses(ysize, xsize)
   nextgrid = falses(ysize, xsize)
-  coords = parseinput(inputspec[1], 1)
+  coords = parseinput(inputspec.path, 1)
 
   anychanged = true
   iterationcount = 0
@@ -170,7 +179,21 @@ function printgrid(grid)
   @show grid
 end
 
-@time begin
-  # solveneighbor()
-  solvevisible()
+function solve()
+  # inputspec = InputSpec("11.input.sample", 10, 10)
+  inputspec = InputSpec("11.input", 92, 94)
+
+  # @time begin
+    # println("neighbor:")
+    # solveneighbor(inputspec)
+  # end
+  # println("")
+
+  @time begin
+    println("visible:")
+    solvevisible(inputspec)
+  end
 end
+
+solve()
+
