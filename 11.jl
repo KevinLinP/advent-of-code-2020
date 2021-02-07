@@ -90,37 +90,20 @@ function solvevisible(inputspec)
       visiblecoords = coordwithvis.visiblecoords
 
       isoccupied = currentgrid[coord]
+      occupiedcount = count(vc -> (currentgrid[vc]), visiblecoords)
 
-      if isoccupied
-        if length(visiblecoords) < 5
-          continue
-        end
-
-        occupiedcount = 0
-
-        for visiblecoord in visiblecoords
-          if currentgrid[visiblecoord]
-            occupiedcount += 1
-          end
-
-          if occupiedcount >= 5
-            nextgrid[coord] = false
-            anychanged = true
-            continue
-          end
-        end
+      if isoccupied && occupiedcount >= 5
+        nextgrid[coord] = false
+        anychanged = true
+      elseif !isoccupied && occupiedcount == 0
+        nextgrid[coord] = true
+        anychanged = true
       else
-        # i find the .any more explict to read than the .all
-        if any(visiblecoord -> (currentgrid[visiblecoord]), visiblecoords)
-          continue
-        else
-          nextgrid[coord] = true
-          anychanged = true
-        end
+        nextgrid[coord] = isoccupied
       end
     end
 
-    copyto!(currentgrid, nextgrid)
+    currentgrid, nextgrid = nextgrid, currentgrid
   end
 
   @printf("iterationcount: %i, filledseats: %i\r\n", iterationcount, count(b->(b), currentgrid))
