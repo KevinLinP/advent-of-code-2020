@@ -71,15 +71,15 @@ fn solve(seats: &Vec<Seat>) {
                 }
             }
 
+            let mut next_value = current_value;
             if current_value && occupied_count >= 5 {
-                next_grid[coord.y][coord.x] = false;
+                next_value = false
                 any_changed = true
             } else if !current_value && occupied_count == 0 {
-                next_grid[coord.y][coord.x] = true;
+                next_value = true
                 any_changed = true
-            } else {
-                next_grid[coord.y][coord.x] = current_value;
             }
+            next_grid[coord.y][coord.x] = next_value;
         }
 
         let temp_grid = current_grid;
