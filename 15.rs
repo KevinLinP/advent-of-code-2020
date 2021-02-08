@@ -1,3 +1,5 @@
+use std::collections::{hash_map::Entry};
+use std::time::{Instant};
 use fnv::FnvHashMap;
 
 //const TARGET: usize = 2020;
@@ -7,6 +9,14 @@ const TARGET: usize = 30000000;
 const START: [u32; 6] = [10,16,6,0,1,17];
 
 fn main() {
+    let start = Instant::now();
+    solve();
+    let duration = start.elapsed();
+
+    println!("{}.{:03}s", duration.as_secs(), duration.subsec_millis());
+}
+
+fn solve() {
     let mut all_last_mentioned: FnvHashMap<u32, u32> = FnvHashMap::with_capacity_and_hasher(TARGET / 5, Default::default());
 
     for (i, num) in START.iter().enumerate() {
@@ -28,17 +38,29 @@ fn main() {
         } else {
             current_num = last_number_mentioned_ago;
         }
-        //println!("iteration:{} current_num:{}", iteration, current_num);
 
-        let current_num_last_mentioned = all_last_mentioned.get_mut(&current_num);
-        match current_num_last_mentioned {
-            Some(num) => {
-                last_number_mentioned_ago = iteration as u32 - *num;
-                *num = iteration as u32;
+        //match all_last_mentioned.get_mut(&current_num) {
+            //Some(num) => {
+                //last_number_mentioned_ago = iteration as u32 - *num;
+                //*num = iteration as u32;
+            //}
+            //None => {
+                //last_number_mentioned_ago = 0;
+                //all_last_mentioned.insert(current_num, iteration as u32);
+            //}
+        //}
+
+        // the .get_mut above apparently runs the same
+        // cribbed from
+        // https://github.com/timvisee/advent-of-code-2020/blob/master/day15b/src/main.rs#L28
+        match all_last_mentioned.entry(current_num) {
+            Entry::Occupied(mut entry) => {
+                let previous_value = entry.insert(iteration as u32);
+                last_number_mentioned_ago = iteration as u32 - previous_value;
             }
-            None => {
+            Entry::Vacant(entry) => {
                 last_number_mentioned_ago = 0;
-                all_last_mentioned.insert(current_num, iteration as u32);
+                entry.insert(iteration as u32);
             }
         }
 
