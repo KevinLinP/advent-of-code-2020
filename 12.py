@@ -1,18 +1,14 @@
-debug = False
-# debug = True
-direction = 1
-x = 0
-y = 0
+DEBUG = False
+# DEBUG = True
 
-rotations = {
+ROTATIONS = {
     0: 0,
     90: 1,
     180: 2,
     270: 3,
 }
 
-rotate_divisors = {'L': -90, 'R': 90}
-move_directions = {
+MOVE_DIRECTIONS = {
     'F': None,
     'N': 0,
     'E': 1,
@@ -20,12 +16,16 @@ move_directions = {
     'W': 3
 }
 
-move_vectors = {
+MOVE_VECTORS = {
     0: (0, 1),
     1: (1, 0),
     2: (0, -1),
     3: (-1, 0)
 }
+
+direction = 1
+x = 0
+y = 0
 
 with open('12.input') as file:
     for line in file:
@@ -34,7 +34,7 @@ with open('12.input') as file:
 
         # now with 100% more maps
         if op in ['L', 'R']:
-            rotation = rotations[arg]
+            rotation = ROTATIONS[arg]
 
             if op == 'R':
                 direction += rotation
@@ -43,18 +43,18 @@ with open('12.input') as file:
 
             direction %= 4
         else:
-            move_direction = move_directions[op]
+            move_direction = MOVE_DIRECTIONS[op]
             if move_direction == None:
                 move_direction = direction
-            vec = move_vectors[move_direction]
+            vec = MOVE_VECTORS[move_direction]
 
             x += vec[0] * arg
             y += vec[1] * arg
 
-        if debug:
+        if DEBUG:
             print('%d %d' % (x, y))
 
-if debug:
+if DEBUG:
     print('')
 print('%d %d' % (x, y))
 print('%d' % (abs(x) + abs(y)))
