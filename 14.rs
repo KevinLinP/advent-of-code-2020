@@ -3,8 +3,12 @@ use std::io::{prelude::*, BufReader};
 use regex::Regex;
 use fnv::FnvHashMap;
 
+#[cfg(debug_assertions)]
 const DEBUG: bool = true;
-const INPUT_PATH: &str = "14.input.sample";
+#[cfg(not(debug_assertions))]
+const DEBUG: bool = false;
+
+const INPUT_PATH: &str = "14.input";
 
 fn main() {
     let mask_regex = Regex::new(r"^mask = ([X01]{36})$").unwrap();
@@ -55,13 +59,49 @@ fn main() {
         } else if line.starts_with("mem") {
             let captures = assignment_regex.captures(&line).unwrap();
             let index: u16 = captures.get(1).unwrap().as_str().parse().unwrap();
-            let value: u64 = captures.get(2).unwrap().as_str().parse().unwrap();
+            let mut input_value: u64 = captures.get(2).unwrap().as_str().parse().unwrap();
+            let mut write_value: u64 = 0;
 
             if DEBUG {
-                println!("{} {}", index, value);
+                println!("{} {}", index, input_value);
+            }
+
+            for (i, bit_value) in bit_values.iter().enumerate() {
+                let mask_value = mask[i];
+                let mut input_value_bit = false;
+
+                if input_value >= *bit_value {
+                    input_value -= *bit_value;
+                    input_value_bit = true;
+                }
+
+                match mask_value {
+                    -1 => (),
+                    1 => {
+                        write_value += bit_value;
+                    },
+                    0 => {
+                        if input_value_bit {
+                            write_value += bit_value;
+                        }
+                    },
+                    _ => {
+                        panic!("unexpected mask_value");
+                    }
+                }
+            }
+
+            memory.insert(index, write_value);
+
+            if DEBUG {
+                println!("{}", write_value);
             }
         } else {
             panic!("unexpected line");
         }
     }
+
+    let sum: u64 = memory.values().sum();
+
+    println!("{}", sum);
 }
